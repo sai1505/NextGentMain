@@ -1,0 +1,89 @@
+from fastapi import APIRouter, HTTPException
+from app.state.session_store import (
+    get_session,
+    append_validator_message,
+    update_session,
+)
+from app.state.guards import require_status
+from app.agents.validation import validation_agent_reply
+from app.services.validation_service import apply_validation_feedback
+from app.agents.validation_finalizer import finalize_validation as ai_finalize
+
+router = APIRouter(prefix="/validator", tags=["Validator"])
+
+
+@router.post("/start")
+def start_validation(session_id: str):
+    session = get_session(session_id)
+    if not session:
+        raise HTTPException(404, "Invalid session")
+
+    require_status(session, "validating")
+
+    intro_message = (
+        "Validation phase started. "
+        "You may ask questions, suggest corrections, or add constraints."
+    )
+
+    append_validator_message(session_id, "assistant", intro_message)
+
+    return {
+        "message": intro_message,
+        "refined_problem": session["refined_problem"],
+    }
+
+
+@router.post("/chat")
+def validator_chat(session_id: str, message: str):
+    session = get_session(session_id)
+    if not session:
+        raise HTTPException(404, "Invalid session")
+
+    require_status(session, ["validating", "finalized"])
+
+    append_validator_message(session_id, "user", message)
+
+    # 🔥 any validator input reopens validation
+    update_session(session_id, status="validating")
+
+    reply = validation_agent_reply(
+        refined_problem=session["refined_problem"],
+        validator_chat=session["validator_chat"],
+    )
+
+    append_validator_message(session_id, "assistant", reply)
+
+    return {"reply": reply, "status": "validating"}
+
+
+@router.post("/finalize")
+def finalize_validation_phase(session_id: str):
+    session = get_session(session_id)
+    if not session:
+        raise HTTPException(404, "Invalid session")
+
+    require_status(session, "validating")
+
+    # 1️⃣ Apply validator feedback (only if needed)
+    updated_refined_problem = apply_validation_feedback(
+        refined_problem=session["refined_problem"],
+        validator_chat=session["validator_chat"],
+    )
+
+    # 2️⃣ Final AI validation
+    validation_result = ai_finalize(updated_refined_problem)
+
+    # 3️⃣ SOFT finalization (reopenable)
+    update_session(
+        session_id,
+        refined_problem=updated_refined_problem,
+        validated_problem=validation_result,
+        status="finalized",
+    )
+
+    return {
+        "message": "Validation finalized (editable)",
+        "changes_applied": updated_refined_problem != session["refined_problem"],
+        "validation_result": validation_result,
+        "status": "finalized",
+    }
