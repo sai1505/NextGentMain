@@ -11,15 +11,12 @@ def create_session():
     _SESSIONS[session_id] = {
         "session_id": session_id,
         "status": "questioning",
-        # Stakeholder ↔ Questioning Agent
-        "stakeholder_chat": [],  # [{role, content}]
-        # After questioning
+        "stakeholder_chat": [],
         "raw_problem": [],
-        # After refining agent
+        "primary_constraints": {},  # ✅ ADD
         "refined_problem": None,
-        # Validator ↔ Validation Agent
-        "validator_chat": [],  # [{role, content}]
-        "validated_problem": None,
+        "validator_chat": [],
+        "final_output": None,
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow(),
     }

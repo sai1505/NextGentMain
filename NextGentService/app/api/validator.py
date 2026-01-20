@@ -7,7 +7,7 @@ from app.state.session_store import (
 from app.state.guards import require_status
 from app.agents.validation import validation_agent_reply
 from app.services.validation_service import apply_validation_feedback
-from app.agents.validation_finalizer import finalize_validation as ai_finalize
+from app.agents.validation import finalize_validation as ai_finalize
 
 router = APIRouter(prefix="/validator", tags=["Validator"])
 
@@ -68,6 +68,7 @@ def finalize_validation_phase(session_id: str):
     updated_refined_problem = apply_validation_feedback(
         refined_problem=session["refined_problem"],
         validator_chat=session["validator_chat"],
+        primary_constraints=session["primary_constraints"],
     )
 
     # 2️⃣ Final AI validation

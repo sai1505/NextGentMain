@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from app.services.constraints import extract_primary_constraints
 from app.state.session_store import (
     create_session,
     get_session,
@@ -37,7 +38,12 @@ def answer_question(session_id: str, answer: str):
     chat = session["stakeholder_chat"]
 
     if clarity_reached(chat):
-        update_session(session_id, status="refining", raw_problem=chat)
+        update_session(
+            session_id,
+            status="refining",
+            raw_problem=chat,
+            primary_constraints=extract_primary_constraints(chat),
+        )
 
         from app.services.refining_service import refine_session_problem
 

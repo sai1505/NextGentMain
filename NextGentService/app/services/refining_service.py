@@ -2,6 +2,7 @@ import json
 from app.crew.refining_crew import run_refining_crew
 from app.state.session_store import get_session, update_session
 from app.schemas.refined_problem import RefinedProblem
+from app.services.constraints import extract_primary_constraints
 
 
 def refine_session_problem(session_id: str):
@@ -10,6 +11,8 @@ def refine_session_problem(session_id: str):
     # ❌ BUG: refining never runs because status is already "refining"
     if session["status"] != "refining":
         return
+
+    primary_constraints = extract_primary_constraints(session["stakeholder_chat"])
 
     crew_output = run_refining_crew(raw_problem_chat=session["raw_problem"])
 
@@ -32,6 +35,11 @@ def refine_session_problem(session_id: str):
         raise ValueError("Unexpected refining output type")
 
     # ✅ SINGLE source of truth
-    update_session(session_id, refined_problem=refined_problem, status="validating")
+    update_session(
+        session_id,
+        refined_problem=refined_problem,
+        primary_constraints=primary_constraints,
+        status="validating",
+    )
 
     return refined_problem
