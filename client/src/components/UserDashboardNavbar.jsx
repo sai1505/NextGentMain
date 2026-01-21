@@ -21,8 +21,8 @@ export default function UserDashboardNavbar() {
 
                 {/* Center: Links */}
                 <ul className="hidden md:flex items-center gap-2 text-sm font-slate">
-                    {["/", "/type", "/services", "/about"].map((path, i) => {
-                        const labels = ["Home", "Type", "Services", "About us"];
+                    {["/", "/validator", "/developer", "/output"].map((path, i) => {
+                        const labels = ["Home", "Validator", "Developer", "Output"];
 
                         return (
                             <NavLink
@@ -30,7 +30,7 @@ export default function UserDashboardNavbar() {
                                 to={path}
                                 className={({ isActive }) =>
                                     `px-4 py-1.5 rounded-full transition cursor-pointer ${isActive
-                                        ? "bg-yellow-300 text-black font-slate-medium"
+                                        ? "bg-yellow-3  00 text-black font-slate-medium"
                                         : "text-gray-600 hover:bg-yellow-100 hover:text-black"
                                     }`
                                 }
