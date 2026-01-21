@@ -1,1 +1,28 @@
 @import "tailwindcss";
+
+@font-face {
+    font-family: slate;
+    src: url(../src/assets/fonts/SlateForOnePlus-Regular.ttf);
+}
+
+@font-face {
+    font-family: slate-medium;
+    src: url(../src/assets/fonts/SlateForOnePlus-Medium.ttf);
+}
+
+@font-face {
+    font-family: slate-bold;
+    src: url(../src/assets/fonts/SlateForOnePlus-Bold.ttf);
+}
+
+.font-slate {
+    font-family: slate;
+}
+
+.font-slate-medium {
+    font-family: slate-medium;
+}
+
+.font-slate-bold {
+    font-family: slate-bold;
+}
