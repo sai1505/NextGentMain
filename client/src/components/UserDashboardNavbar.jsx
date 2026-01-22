@@ -30,7 +30,7 @@ export default function UserDashboardNavbar() {
                                 to={path}
                                 className={({ isActive }) =>
                                     `px-4 py-1.5 rounded-full transition cursor-pointer ${isActive
-                                        ? "bg-yellow-3  00 text-black font-slate-medium"
+                                        ? "bg-yellow-300 text-black font-slate-medium"
                                         : "text-gray-600 hover:bg-yellow-100 hover:text-black"
                                     }`
                                 }

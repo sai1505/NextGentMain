@@ -64,9 +64,14 @@ def detect_required_changes(
         {primary_constraints}
 
         RULES:
-        - NEVER relax primary constraints
-        - If validator feedback violates them → mark infeasible
-        - Do NOT downscale silently
+        - Primary constraints act as a schema, not frozen values
+        - Only fill missing or null fields
+        - NEVER overwrite existing non-null values
+        - NEVER delete existing fields
+        - If validator feedback contradicts an existing filled value → mark infeasible
+        - If new info fills missing data → update constraints
+        - No silent overwrites
+
 
         Refined Problem:
         {refined_problem}

@@ -18,6 +18,8 @@ export default function UserDashboard() {
             const res = await fetch(`${API}/start`, { method: "POST" });
             const data = await res.json();
 
+            sessionStorage.setItem("sessionId", data.session_id);
+
             setSessionId(data.session_id);
             setChat([{ role: "assistant", text: data.question }]);
         };
@@ -85,7 +87,7 @@ export default function UserDashboard() {
                 <div className="sticky bottom-0 bg-black pt-4 pb-6">
                     <div className="flex items-center gap-3 border border-zinc-800 rounded-xl px-4 py-3">
                         <input
-                            className="flex-1 bg-transparent outline-none text-sm text-white placeholder-gray-500"
+                            className="flex-1 bg-transparent outline-none font-slate text-sm text-white placeholder-gray-500"
                             placeholder="Type your response…"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
@@ -93,7 +95,7 @@ export default function UserDashboard() {
                         />
                         <button
                             onClick={sendAnswer}
-                            className="bg-yellow-400 text-black px-4 py-2 rounded-lg text-sm font-medium"
+                            className="bg-yellow-400 text-black px-4 py-2 rounded-lg text-sm font-slate-medium"
                         >
                             Send
                         </button>
