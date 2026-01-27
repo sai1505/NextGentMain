@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.services.constraints import extract_primary_constraints
 from app.state.session_store import (
+    append_validator_message,
     create_session,
     get_session,
     append_stakeholder_message,
@@ -78,7 +79,7 @@ def stakeholder_message(session_id: str, message: str):
     require_status(session, ["validating", "finalized"])
 
     # Store as stakeholder feedback
-    session["raw_problem"].append(message)
+    append_validator_message(session_id, "user", message)
 
     # 🔥 Reopen validation ALWAYS
     session["status"] = "validating"

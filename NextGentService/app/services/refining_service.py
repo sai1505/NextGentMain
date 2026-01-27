@@ -12,8 +12,6 @@ def refine_session_problem(session_id: str):
     if session["status"] != "refining":
         return
 
-    primary_constraints = extract_primary_constraints(session["stakeholder_chat"])
-
     crew_output = run_refining_crew(raw_problem_chat=session["raw_problem"])
 
     # CrewOutput.json can be: BaseModel | dict | str
@@ -33,6 +31,8 @@ def refine_session_problem(session_id: str):
 
     else:
         raise ValueError("Unexpected refining output type")
+
+    primary_constraints = extract_primary_constraints(session["raw_problem"])
 
     # ✅ SINGLE source of truth
     update_session(

@@ -40,14 +40,31 @@ def finalize_validation(refined_problem: dict) -> dict:
         }
 
     prompt = f"""
-        Revalidate feasibility STRICTLY.
+        You are a Senior System Architect.
+
+        Evaluate feasibility logically based on:
+        - budget realism
+        - technical complexity
+        - location constraints
+        - scope vs budget
+        - regulatory feasibility
 
         Refined Problem:
         {refined_problem}
 
+        RULES
+        - Do NOT modify constraints.
+        - Do NOT suggest updates.
+        - Only judge feasibility.
+
         Respond ONLY JSON:
-        {{ "feasible": true, "key_risks": [], "final_notes": "Approved" }}
-        """
+        {{
+        "feasible": true | false,
+        "key_risks": [],
+        "final_notes": "..."
+        }}
+    """
+
     response = llm.call(messages=[{"role": "user", "content": prompt}])
     return extract_json(response)
 
@@ -63,15 +80,18 @@ def detect_required_changes(
         PRIMARY CONSTRAINTS (IMMUTABLE):
         {primary_constraints}
 
-        RULES:
-        - Primary constraints act as a schema, not frozen values
-        - Only fill missing or null fields
-        - NEVER overwrite existing non-null values
-        - NEVER delete existing fields
-        - If validator feedback contradicts an existing filled value → mark infeasible
-        - If new info fills missing data → update constraints
-        - No silent overwrites
+        TASK:
+        - Read the validator conversation
+        - Extract ONLY concrete constraint updates explicitly stated by the user
+        - Ignore suggestions, questions, or hypotheticals
+        - If the user says "budget is 20L", extract budget=20L
+        - If no concrete updates are present, return empty corrections
 
+        RULES:
+        - ALWAYS overwrite constraints if user explicitly updates them
+        - User validation overrides previous constraints
+        - If user input contradicts existing constraints, treat the new value as an UPDATE
+        - Do NOT mark feasible=false for constraint updates
 
         Refined Problem:
         {refined_problem}
@@ -82,10 +102,12 @@ def detect_required_changes(
         Respond ONLY in JSON:
 
         {{
-          "changes_required": true,
-          "feasible": true | false,
-          "reason": "...",
-          "corrections": []
+        "changes_required": true | false,
+        "feasible": true | false,
+        "reason": "...",
+        "corrections": {{
+            "<constraint_name>": "<new_value>"
+        }}
         }}
         """
 

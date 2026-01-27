@@ -25,3 +25,12 @@ Respond ONLY in JSON:
 
     response = llm.call(messages=[{"role": "user", "content": prompt}])
     return extract_json(response)
+
+
+def merge_primary_constraints(primary: dict, corrections: dict) -> dict:
+    updated = primary.copy()
+
+    for k, v in corrections.items():
+        updated[k] = v  # ✅ ALWAYS overwrite
+
+    return updated

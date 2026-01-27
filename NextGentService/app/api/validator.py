@@ -18,7 +18,7 @@ def start_validation(session_id: str):
     if not session:
         raise HTTPException(404, "Invalid session")
 
-    require_status(session, "validating")
+    require_status(session, ["validating", "finalized"])
 
     intro_message = (
         "Validation phase started. "
@@ -64,27 +64,29 @@ def finalize_validation_phase(session_id: str):
 
     require_status(session, "validating")
 
-    # 1️⃣ Apply validator feedback (only if needed)
-    updated_refined_problem = apply_validation_feedback(
+    updated_refined_problem, updated_constraints = apply_validation_feedback(
         refined_problem=session["refined_problem"],
         validator_chat=session["validator_chat"],
         primary_constraints=session["primary_constraints"],
     )
 
-    # 2️⃣ Final AI validation
+    updated_constraints = updated_refined_problem.get(
+        "constraints", session["primary_constraints"]
+    )
+
+    print("SESSION CONSTRAINTS AFTER FINALIZE:", session["primary_constraints"])
+
     validation_result = ai_finalize(updated_refined_problem)
 
-    # 3️⃣ SOFT finalization (reopenable)
     update_session(
         session_id,
         refined_problem=updated_refined_problem,
-        validated_problem=validation_result,
+        primary_constraints=updated_constraints,  # ✅ USER TRUTH
+        validated_problem=validation_result,  # ✅ AI FEASIBILITY OPINION
         status="finalized",
     )
 
     return {
-        "message": "Validation finalized (editable)",
-        "changes_applied": updated_refined_problem != session["refined_problem"],
-        "validation_result": validation_result,
         "status": "finalized",
+        "validation_result": validation_result,
     }
