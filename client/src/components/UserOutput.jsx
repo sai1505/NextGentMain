@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import OutputViewer from "../UI/OutputViewer";
+
 
 const API = "http://localhost:8000/output";
 
@@ -78,11 +80,7 @@ export default function UserOutput() {
                         </p>
                     )}
 
-                    {!loading && data && (
-                        <pre className="text-sm text-gray-300 overflow-x-auto whitespace-pre-wrap leading-relaxed">
-                            {JSON.stringify(data, null, 2)}
-                        </pre>
-                    )}
+                    {!loading && data && <OutputViewer data={data} />}
 
                     {!loading && !data && !error && (
                         <p className="text-sm text-gray-500 italic">
